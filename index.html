@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SAIFANO ProducTree</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --dark: #1B5E20;
+            --bg: #F8F9F8;
+            --white: #FFFFFF;
+            --text: #263238;
+            --danger: #E53935;
+            --accent: #FFC107;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0; padding: 0;
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        header {
+            background: var(--white);
+            height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .logo { font-weight: 700; color: var(--dark); font-size: 1.1rem; }
+        .coins { background: #FFF9C4; color: #F57F17; font-weight: 700; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem;}
+
+        #content-window { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+        .screen { display: none; max-width: 450px; margin: 0 auto; animation: fadeInUp 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); }}
+
+        /* TIMER BOX */
+        .stage {
+            width: 260px; height: 260px; margin: 10px auto;
+            position: relative; display: flex; align-items: center; justify-content: center;
+        }
+
+        .timer-svg { position: absolute; transform: rotate(-90deg); width: 100%; height: 100%; }
+        .ring-b { fill: none; stroke: #eee; stroke-width: 7; }
+        .ring-f { 
+            fill: none; stroke: var(--primary); stroke-width: 7; 
+            stroke-linecap: round; stroke-dasharray: 660; 
+            stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear;
+        }
+
+        #center-spot {
+            width: 140px; height: 140px;
+            display: flex; align-items: center; justify-content: center;
+            animation: treeMovement 4s infinite ease-in-out;
+            z-index: 10;
+        }
+        @keyframes treeMovement { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+
+        .time-txt { text-align: center; font-size: 3.8rem; font-weight: 700; color: var(--text); margin: 0; line-height: 1; }
+        .quote-txt { text-align: center; font-style: italic; color: #90A4AE; min-height: 40px; margin: 15px 20px; font-size: 0.9rem; }
+
+        /* UI ELEMENTS */
+        .card { background: var(--white); padding: 20px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+        .selector-box {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #F1F8E9; border: 1.5px dashed var(--primary);
+            padding: 12px 18px; border-radius: 12px; font-weight: 700; 
+            margin-bottom: 15px; cursor: pointer; color: var(--dark); font-size: 0.9rem;
+        }
+        input[type=range] { width: 100%; height: 6px; border-radius: 10px; accent-color: var(--primary); margin: 20px 0; cursor: pointer; -webkit-appearance: none; background: #ddd; }
+        
+        .btn { width: 100%; border: none; padding: 15px; border-radius: 14px; font-size: 1rem; font-weight: 700; color: #fff; cursor: pointer; }
+        .btn-g { background: var(--primary); box-shadow: 0 4px 10px rgba(76,175,80,0.2); }
+        .btn-r { background: var(--danger); margin-top: 15px; box-shadow: 0 4px 10px rgba(229,57,53,0.2); }
+
+        /* LISTS */
+        .item-row { display: flex; align-items: center; justify-content: space-between; background: var(--white); padding: 12px; border-radius: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .tree-preview-sm { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; background: #f9f9f9; border-radius: 10px; padding: 5px;}
+        .buy-btn { background: var(--accent); color: #442B00; padding: 8px 18px; border-radius: 25px; border: none; font-weight: 700; cursor: pointer; }
+        .buy-btn:disabled { opacity: 0.5; background: #eee; }
+        .forest-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); gap: 10px; }
+        .f-card { background: var(--white); padding: 10px; border-radius: 12px; text-align: center; font-size: 0.7rem; font-weight: bold; }
+
+        nav {
+            background: var(--white); height: 70px; border-top: 1px solid #eee;
+            display: flex; justify-content: space-around; align-items: center; flex-shrink: 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .tab-i { background: none; border: none; display: flex; flex-direction: column; align-items: center; color: #CFD8DC; font-weight: 700; font-size: 0.75rem; flex: 1; cursor: pointer;}
+        .tab-i.active { color: var(--primary); }
+        .tab-i span { font-size: 1.4rem; margin-bottom: 2px; }
+
+        .branding { text-align: center; font-size: 0.7rem; color: #90A4AE; padding: 25px 0; font-weight: 700; letter-spacing: 0.5px; }
+
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 500; }
+        .overlay.visible { display: flex; }
+        .pop { background: white; width: 85%; max-width: 340px; border-radius: 25px; padding: 30px; text-align: center; }
+
+        .hidden { display: none !important; }
+        body.focused header, body.focused nav { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">SAIFANO ProducTree</div>
+        <div class="coins">🪙 <span id="val-coins">0</span></div>
+    </header>
+
+    <div id="content-window">
+        <!-- HOME SCREEN -->
+        <div id="view-home" class="screen active">
+            <div class="stage">
+                <svg class="timer-svg" viewBox="0 0 220 220">
+                    <circle class="ring-b" cx="110" cy="110" r="105"/>
+                    <circle class="ring-f" id="prog-circle" cx="110" cy="110" r="105"/>
+                </svg>
+                <div id="center-spot"></div>
+            </div>
+
+            <h1 class="time-txt" id="time-val">25:00</h1>
+            <div class="quote-txt" id="quote-area">Grow a beautiful forest.</div>
+
+            <div id="ui-prep">
+                <div class="selector-box" onclick="App.nav('shop')">
+                    <span>Active Tree: <b id="ui-tree-name">Oak</b></span>
+                    <span>CHANGE 🔄</span>
+                </div>
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; font-weight:700">
+                        <span>Timer</span> <span id="lbl-minutes">25 min</span>
+                    </div>
+                    <input type="range" id="min-slider" min="1" max="120" value="25">
+                    <button class="btn btn-g" onclick="App.startSession()">START FOCUS</button>
+                </div>
+            </div>
+
+            <div id="ui-active" class="hidden" style="text-align: center;">
+                <button class="btn btn-r" style="width:auto; padding:12px 40px;" onclick="App.askStop()">GIVE UP</button>
+            </div>
+            
+            <div class="branding">Developed by SAIFUR RAHAMAN SAIF</div>
+        </div>
+
+        <!-- FOREST SCREEN -->
+        <div id="view-forest" class="screen">
+            <h2 style="margin-top:0">Your Forest</h2>
+            <div class="forest-grid" id="ui-forest-list"></div>
+            <div id="ui-empty" style="text-align:center; padding:80px 0; color:#ccc;">Your forest is empty.</div>
+            <div class="branding">Developed by SAIFUR RAHAMAN SAIF</div>
+        </div>
+
+        <!-- STORE SCREEN -->
+        <div id="view-shop" class="screen">
+            <h2 style="margin-top:0">The Nursery</h2>
+            <div id="ui-shop-list"></div>
+            <div class="branding">Developed by SAIFUR RAHAMAN SAIF</div>
+        </div>
+    </div>
+
+    <nav>
+        <button class="tab-i active" onclick="App.nav('home', this)"><span>⏱️</span>Timer</button>
+        <button class="tab-i" onclick="App.nav('forest', this)"><span>🌲</span>Forest</button>
+        <button class="tab-i" onclick="App.nav('shop', this)"><span>🛍️</span>Store</button>
+    </nav>
+
+    <!-- OVERLAYS -->
+    <div class="overlay" id="modal-layer">
+        <div id="win-pop" class="pop hidden">
+            <h2 style="color:var(--primary)">Well Done!</h2>
+            <div id="win-svg" style="height:90px; margin-bottom: 10px;"></div>
+            <p style="font-size:1.1rem; font-weight:bold; margin:0">+<span id="win-gold-amt">0</span> SaifCoins</p>
+            <p>You stayed focused for <b id="win-time-amt">25</b> minutes.</p>
+            <button class="btn btn-g" onclick="App.close()">Collect</button>
+        </div>
+        <div id="fail-pop" class="pop hidden">
+            <h2 style="color:var(--danger)">Surrender?</h2>
+            <p>Leaving will wither the tree. Do you really want to stop now?</p>
+            <button class="btn btn-r" onclick="App.finish(false)">Give Up</button>
+            <button onclick="App.close()" style="border:none;background:none;color:#999;font-weight:700;margin-top:20px;cursor:pointer">Keep Going</button>
+        </div>
+    </div>
+
+    <script>
+    //<![CDATA[
+    
+    // GFX CONSTANTS
+    const Lib = {
+        s_seed:   `<circle cx="50" cy="50" r="10" fill="#795548"/>`,
+        s_sprout: `<path d="M50,70 Q50,45 35,35 M50,70 Q50,50 65,35" stroke="#81C784" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+        s_sap:    `<path d="M50,70 L50,40 M50,50 L35,35 M50,60 L65,45" stroke="#66BB6A" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+        s_dead:   `<path d="M30,30 L70,70 M70,30 L30,70" stroke="#B0BEC5" stroke-width="7"/>`,
+        trees: {
+            oak:    {id:'oak', n:'Classic Oak',  c:0,    svg:`<circle cx="50" cy="40" r="30" fill="#43A047"/><rect x="43" y="65" width="14" height="25" fill="#5D4037"/>`},
+            pine:   {id:'pine', n:'Alps Pine',   c:80,   svg:`<path d="M50,15 L15,80 L85,80 Z" fill="#2E7D32"/><rect x="44" y="80" width="12" height="10" fill="#3E2723"/>`},
+            sakura: {id:'sakura',n:'Sakura Pink', c:250,  svg:`<g fill="#F06292"><circle cx="35" cy="40" r="18"/><circle cx="65" cy="40" r="18"/><circle cx="50" cy="25" r="18"/></g><rect x="46" y="60" width="8" height="30" fill="#5D4037"/>`},
+            neon:   {id:'neon', n:'Cyber Night', c:500,  svg:`<rect x="45" y="60" width="10" height="35" fill="#111"/><circle cx="50" cy="40" r="28" fill="#000" stroke="#00E5FF" stroke-width="3"/><circle cx="50" cy="40" r="10" fill="#00E5FF"/>`},
+            god:    {id:'god',  n:'Ancient God', c:1000, svg:`<circle cx="50" cy="40" r="32" fill="#FFC107" stroke="#FF6F00" stroke-width="3"/><rect x="43" y="70" width="14" height="20" fill="#3E2723"/>`}
+        }
+    };
+
+    window.App = {
+        save: { coins: 0, unlock: ['oak'], current: 'oak', history: [] },
+        timer: { handle: null, rem: 1500, full: 1500, on: false },
+
+        init: function() {
+            let data = localStorage.getItem('SAIFANO_FIX_V7');
+            if(data) this.save = JSON.parse(data);
+
+            this.updHeader();
+            this.setCenter(Lib.s_seed);
+
+            const slider = document.getElementById('min-slider');
+            slider.addEventListener('input', (e) => {
+                if(this.timer.on) return;
+                let m = parseInt(e.target.value);
+                document.getElementById('lbl-minutes').innerText = m + " min";
+                document.getElementById('time-val').innerText = m + ":00";
+                this.timer.full = m * 60;
+                this.timer.rem = this.timer.full;
+            });
+
+            this.timer.full = parseInt(slider.value) * 60;
+            this.timer.rem = this.timer.full;
+            this.quote();
+            window.App = this;
+        },
+
+        startSession: function() {
+            this.timer.rem = this.timer.full;
+            this.timer.on = true;
+            document.body.classList.add('focused');
+            document.getElementById('ui-prep').classList.add('hidden');
+            document.getElementById('ui-active').classList.remove('hidden');
+
+            this.setCenter(Lib.s_seed);
+            this.setRing(0);
+            this.quote();
+
+            this.timer.handle = setInterval(() => {
+                this.timer.rem--;
+                this.tick();
+                if(this.timer.rem <= 0) this.finish(true);
+            }, 1000);
+        },
+
+        tick: function() {
+            let m = Math.floor(this.timer.rem / 60);
+            let s = this.timer.rem % 60;
+            document.getElementById('time-val').innerText = m + ":" + (s < 10 ? '0'+s : s);
+
+            let p = 1 - (this.timer.rem / this.timer.full);
+            this.setRing(p);
+
+            if(p < 0.2) this.setCenter(Lib.s_seed);
+            else if(p < 0.5) this.setCenter(Lib.s_sprout);
+            else if(p < 0.8) this.setCenter(Lib.s_sap);
+            else {
+                this.setCenter(Lib.trees[this.save.current].svg);
+            }
+        },
+
+        askStop: function() {
+            document.getElementById('modal-layer').classList.add('visible');
+            document.getElementById('fail-pop').classList.remove('hidden');
+        },
+
+        finish: function(success) {
+            clearInterval(this.timer.handle);
+            this.timer.on = false;
+            document.body.classList.remove('focused');
+            document.getElementById('ui-prep').classList.remove('hidden');
+            document.getElementById('ui-active').classList.add('hidden');
+            this.close();
+
+            let mDone = Math.floor(this.timer.full / 60);
+            this.setRing(0);
+            document.getElementById('time-val').innerText = mDone + ":00";
+
+            if(success) {
+                this.save.coins += mDone;
+                this.save.history.unshift({id:this.save.current, min:mDone, dead:false});
+                
+                // Show modal UI
+                document.getElementById('win-time-amt').innerText = mDone;
+                document.getElementById('win-gold-amt').innerText = mDone;
+                document.getElementById('win-svg').innerHTML = `<svg viewBox="0 0 100 100" style="height:100%">${Lib.trees[this.save.current].svg}</svg>`;
+                document.getElementById('modal-layer').classList.add('visible');
+                document.getElementById('win-pop').classList.remove('hidden');
+                
+                // Success Audio Chime
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if(ctx){
+                   let o = ctx.createOscillator(); let g = ctx.createGain();
+                   o.connect(g); g.connect(ctx.destination);
+                   o.start(); o.stop(ctx.currentTime+0.2);
+                }
+            } else {
+                let mActually = Math.floor((this.timer.full - this.timer.rem)/60);
+                this.save.history.unshift({id:this.save.current, min:mActually, dead:true});
+                this.setCenter(Lib.s_dead);
+            }
+            this.persist();
+        },
+
+        persist: function() { localStorage.setItem('SAIFANO_FIX_V7', JSON.stringify(this.save)); this.updHeader(); },
+        updHeader: function() {
+            document.getElementById('val-coins').innerText = this.save.coins;
+            document.getElementById('ui-tree-name').innerText = Lib.trees[this.save.current].n;
+        },
+
+        nav: function(page, b) {
+            if(this.timer.on) return;
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('view-'+page).classList.add('active');
+            document.querySelectorAll('.tab-i').forEach(t => t.classList.remove('active'));
+            if(b) b.classList.add('active');
+
+            if(page === 'shop') this.buildShop();
+            if(page === 'forest') this.buildForest();
+        },
+
+        buildShop: function() {
+            const list = document.getElementById('ui-shop-list'); list.innerHTML = '';
+            Object.values(Lib.trees).forEach(t => {
+                const owned = this.save.unlock.includes(t.id);
+                const active = this.save.current === t.id;
+                let action = '';
+                if(owned) {
+                    if(active) action = `<small style="font-weight:700; color:var(--primary)">ACTIVE</small>`;
+                    else action = `<button class="buy-btn" onclick="App.equip('${t.id}')" style="background:#eee;color:#444">SELECT</button>`;
+                } else {
+                    let aff = this.save.coins >= t.c;
+                    action = `<button class="buy-btn" onclick="App.buy('${t.id}')" ${aff?'':'disabled'}>${t.c}</button>`;
+                }
+                list.innerHTML += `<div class="item-row"><div style="display:flex;align-items:center;gap:15px"><div class="tree-preview-sm"><svg viewBox="0 0 100 100" style="width:100%">${t.svg}</svg></div><b>${t.n}</b></div><div>${action}</div></div>`;
+            });
+        },
+
+        buildForest: function() {
+            const grid = document.getElementById('ui-forest-list'); grid.innerHTML = '';
+            if(!this.save.history.length) { document.getElementById('ui-empty').style.display='block'; return; }
+            document.getElementById('ui-empty').style.display='none';
+            this.save.history.forEach(h => {
+                let svg = h.dead ? Lib.s_dead : Lib.trees[h.id].svg;
+                grid.innerHTML += `<div class="f-card"><svg viewBox="0 0 100 100" height="45" style="opacity:${h.dead?0.4:1}">${svg}</svg><br>${h.min}m</div>`;
+            });
+        },
+
+        buy: function(id) { 
+            if(this.save.coins >= Lib.trees[id].c) {
+                this.save.coins -= Lib.trees[id].c;
+                this.save.unlock.push(id); this.save.current = id;
+                this.persist(); this.buildShop();
+            }
+        },
+        equip: function(id) { this.save.current = id; this.persist(); this.buildShop(); },
+        setCenter: function(html) { document.getElementById('center-spot').innerHTML = `<svg viewBox="0 0 100 100" width="100%">${html}</svg>`; },
+        setRing: function(p) { document.getElementById('prog-circle').style.strokeDashoffset = 660 - (660 * p); },
+        close: function() {
+            document.getElementById('modal-layer').classList.remove('visible');
+            document.getElementById('win-pop').classList.add('hidden');
+            document.getElementById('fail-pop').classList.add('hidden');
+            if(!this.timer.on) this.setCenter(Lib.s_seed);
+        },
+        quote: function() {
+            let qs = ["Growth takes time.", "Stay focused, plant more.", "Deep focus creates deep roots.", "Quiet the noise, grow your forest."];
+            document.getElementById('quote-area').innerText = '"' + qs[Math.floor(Math.random()*qs.length)] + '"';
+        }
+    };
+
+    window.onload = function(){ App.init(); }
+    //]]>
+    </script>
+</body>
+</html>
