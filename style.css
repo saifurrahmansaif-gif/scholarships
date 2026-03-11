@@ -1,0 +1,237 @@
+/* ==========================================================================
+   1. CSS VARIABLES (Shows you know how to write scalable, professional code)
+   ========================================================================== */
+   :root {
+    --bg-dark: #0f172a; /* Deep slate blue */
+    --bg-card: rgba(30, 41, 59, 0.7); /* Frosted glass background */
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary-glow: #38bdf8;
+    --secondary-glow: #818cf8;
+    --border-glass: rgba(255, 255, 255, 0.1);
+    
+    /* Tag Colors */
+    --tag-fully: #10b981; /* Emerald green for fully funded */
+    --tag-partial: #f59e0b; /* Amber for partial */
+    --tag-self: #ef4444; /* Red for self-funded */
+}
+
+/* ==========================================================================
+   2. GLOBAL RESET & TYPOGRAPHY
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+    /* This creates a beautiful, subtle glowing background effect */
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(129, 140, 248, 0.08), transparent 25%);
+    background-attachment: fixed;
+}
+
+/* Custom modern scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-glow); }
+
+/* ==========================================================================
+   3. HERO SECTION & SEARCH BAR (The "Eye-Catching" Header)
+   ========================================================================== */
+.hero {
+    padding: 6rem 2rem 3rem;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+/* Gradient Text Effect */
+.highlight {
+    background: linear-gradient(to right, var(--primary-glow), var(--secondary-glow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+}
+
+/* Search Container Glassmorphism */
+.search-container {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-glass);
+    padding: 1.5rem;
+    border-radius: 16px;
+    backdrop-filter: blur(10px); /* The frosted glass blur */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, select:focus {
+    border-color: var(--primary-glow);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+}
+
+/* ==========================================================================
+   4. STATS & GRID LAYOUT (Responsive Design)
+   ========================================================================== */
+.stats-section {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+}
+
+/* CSS Grid - Automatically adjusts columns based on screen size! */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ==========================================================================
+   5. SCHOLARSHIP CARDS (Micro-interactions & Animations)
+   ========================================================================== */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+/* Smooth hover animation */
+.card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(56, 189, 248, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 15px rgba(56, 189, 248, 0.1);
+}
+
+.card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.card-country {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 1rem;
+}
+
+.card-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Dynamic Badge Colors */
+.badge.fully { background: rgba(16, 185, 129, 0.1); color: var(--tag-fully); border: 1px solid rgba(16, 185, 129, 0.2); }
+.badge.partial { background: rgba(245, 158, 11, 0.1); color: var(--tag-partial); border: 1px solid rgba(245, 158, 11, 0.2); }
+.badge.self { background: rgba(239, 68, 68, 0.1); color: var(--tag-self); border: 1px solid rgba(239, 68, 68, 0.2); }
+.badge.level { background: rgba(255, 255, 255, 0.05); color: #cbd5e1; border: 1px solid var(--border-glass); }
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-glass);
+}
+
+.deadline {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* The Apply Button */
+.apply-btn {
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.apply-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* ==========================================================================
+   6. MOBILE RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 600px) {
+    .hero h1 { font-size: 2.5rem; }
+    .filters { flex-direction: column; }
+    .hero { padding: 4rem 1rem 2rem; }
+    main { padding: 0 1rem 3rem; }
+}
